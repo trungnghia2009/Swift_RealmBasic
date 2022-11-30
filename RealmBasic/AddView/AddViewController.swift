@@ -27,7 +27,7 @@ class AddViewController: UIViewController {
     @IBOutlet weak var subtitleWarningLabel: UILabel!
     
     @IBOutlet weak var priceTextField: UITextField!
-    @Published @IBOutlet var addButton: UIButton!
+    @IBOutlet var addButton: UIButton!
     
     weak var delegate: AddViewControllerDelegate?
     

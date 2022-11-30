@@ -70,9 +70,13 @@ class DetailViewController: UIViewController {
             }.store(in: &subscriptions)
         
         subtitleTextField.publisher(for: .editingChanged)
-            .combineLatest(priceTextField.publisher(for: .editingChanged))
-            .sink { [weak self] (textField1, textField2) in
-                self?.viewModel.validateInput(subtitle: textField1.text, price: textField2.text)
+            .sink { [weak self] subtitleTextField in
+                self?.viewModel.validateInput(subtitle: subtitleTextField.text, price: self?.priceTextField.text)
+            }.store(in: &subscriptions)
+        
+        priceTextField.publisher(for: .editingChanged)
+            .sink { [weak self] priceTextField in
+                self?.viewModel.validateInput(subtitle: self?.subtitleTextField.text, price: priceTextField.text)
             }.store(in: &subscriptions)
         
         // Output

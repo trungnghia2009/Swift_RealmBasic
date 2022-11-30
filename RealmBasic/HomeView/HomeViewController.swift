@@ -91,12 +91,10 @@ class HomeViewController: UIViewController {
 }
 
 extension HomeViewController: UITableViewDataSource {
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.getNumberOfBook()
+        let bookCount = viewModel.getNumberOfBook()
+        bookCount == 0 ? tableView.setEmptyMessage(message: "Please tap + to add new book.", size: 20) : tableView.restore()
+        return bookCount
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

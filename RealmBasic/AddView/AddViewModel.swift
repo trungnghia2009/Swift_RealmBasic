@@ -23,11 +23,7 @@ class AddViewModel {
             return
         }
         
-        if titleCount > 3 && subtitleCount > 5 && priceCount > 0 {
-            addButtonState.send(true)
-        } else {
-            addButtonState.send(false)
-        }
+        (titleCount > 3 && subtitleCount > 5 && priceCount > 0) ? addButtonState.send(true) : addButtonState.send(false)
     }
     
     func setTitleWarningState(title: String?) {

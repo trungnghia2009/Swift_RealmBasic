@@ -26,6 +26,7 @@
 		588FF85D28E992FC00C819C6 /* InteractionPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588FF85C28E992FC00C819C6 /* InteractionPublisher.swift */; };
 		588FF86028E994C400C819C6 /* InteractionSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588FF85F28E994C400C819C6 /* InteractionSubscription.swift */; };
 		588FF86328E9969A00C819C6 /* UIControlPublishable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588FF86228E9969A00C819C6 /* UIControlPublishable.swift */; };
+		58A3F5FA29375CCC007E9724 /* UITableView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58A3F5F929375CCC007E9724 /* UITableView+Extension.swift */; };
 		58F5C7CF2921E348003E837B /* EventBusApplicationBecomeActive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F5C7CE2921E348003E837B /* EventBusApplicationBecomeActive.swift */; };
 /* End PBXBuildFile section */
 
@@ -50,6 +51,7 @@
 		588FF85C28E992FC00C819C6 /* InteractionPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionPublisher.swift; sourceTree = "<group>"; };
 		588FF85F28E994C400C819C6 /* InteractionSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionSubscription.swift; sourceTree = "<group>"; };
 		588FF86228E9969A00C819C6 /* UIControlPublishable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIControlPublishable.swift; sourceTree = "<group>"; };
+		58A3F5F929375CCC007E9724 /* UITableView+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UITableView+Extension.swift"; sourceTree = "<group>"; };
 		58F5C7CE2921E348003E837B /* EventBusApplicationBecomeActive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventBusApplicationBecomeActive.swift; sourceTree = "<group>"; };
 		ABB35A88A4E0B841BF9E8374 /* Pods_RealmBasic.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RealmBasic.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DEBCE0C10DFF040E50B30439 /* Pods-RealmBasic.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RealmBasic.debug.xcconfig"; path = "Target Support Files/Pods-RealmBasic/Pods-RealmBasic.debug.xcconfig"; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 				580D799C28D4700400DF0FBD /* AddView */,
 				580D79A128D5579900DF0FBD /* DetaiView */,
 				58F5C7CD2921E31A003E837B /* EventBus */,
+				58A3F5F829375CB0007E9724 /* Extensions */,
 				580D797528D4527000DF0FBD /* AppDelegate.swift */,
 				580D797728D4527000DF0FBD /* SceneDelegate.swift */,
 				580D797B28D4527000DF0FBD /* Main.storyboard */,
@@ -175,6 +178,14 @@
 				588FF86228E9969A00C819C6 /* UIControlPublishable.swift */,
 			);
 			path = UIControlPublisher;
+			sourceTree = "<group>";
+		};
+		58A3F5F829375CB0007E9724 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				58A3F5F929375CCC007E9724 /* UITableView+Extension.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		58F5C7CD2921E31A003E837B /* EventBus */ = {
@@ -323,6 +334,7 @@
 				580D799328D457E800DF0FBD /* HomeViewModel.swift in Sources */,
 				588FF85D28E992FC00C819C6 /* InteractionPublisher.swift in Sources */,
 				588FF86028E994C400C819C6 /* InteractionSubscription.swift in Sources */,
+				58A3F5FA29375CCC007E9724 /* UITableView+Extension.swift in Sources */,
 				58F5C7CF2921E348003E837B /* EventBusApplicationBecomeActive.swift in Sources */,
 				580D797828D4527000DF0FBD /* SceneDelegate.swift in Sources */,
 			);

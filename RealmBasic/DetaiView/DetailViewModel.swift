@@ -21,11 +21,7 @@ class DetailViewModel {
             return
         }
         
-        if subtitleCount > 5 && priceCount > 0 {
-            okButtonState.send(true)
-        } else {
-            okButtonState.send(false)
-        }
+        (subtitleCount > 5 && priceCount > 0) ? okButtonState.send(true) : okButtonState.send(false)
     }
     
     func setSubtitleWarningState(title: String?) {
