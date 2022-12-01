@@ -14,7 +14,6 @@ protocol AddViewControllerDelegate: AnyObject {
 
 class AddViewController: UIViewController {
 
-    private let realm = BookRealmManager.shared
     private let viewModel = AddViewModel()
     private var subscriptions = Set<AnyCancellable>()
     
@@ -95,7 +94,7 @@ class AddViewController: UIViewController {
             .sink { [weak self] _ in
                 guard let self = self else { return }
                 print("Did tap add button...")
-                self.realm.addBook(title: self.titleTextField.text,
+                self.viewModel.addBook(title: self.titleTextField.text,
                                    subtitle: self.subtitleTextField.text,
                                    price: self.priceTextField.text)
                 self.dismiss(animated: true) {

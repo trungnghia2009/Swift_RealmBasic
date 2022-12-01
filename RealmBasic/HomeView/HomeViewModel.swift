@@ -11,7 +11,15 @@ import Combine
 class HomeViewModel {
     
     private var books = [Book]()
-    private var notificationToken: NotificationToken?
+    private var subscriptions = Set<AnyCancellable>()
+    private let realmManager: BookRealmService
+    
+    let trashButtonState = PassthroughSubject<Bool, Never>()
+    let onReloadTableView = PassthroughSubject<Void, Never>()
+    
+    init(realmManager: BookRealmService = BookRealmManager(config: RealmConfig.shared.config)) {
+        self.realmManager = realmManager
+    }
     
     func getBooks() -> [Book] {
         return books
@@ -29,13 +37,43 @@ class HomeViewModel {
         return books.count
     }
     
-}
-
-enum APIError: Error {
-    case invalidURL
-}
-
-struct BaseResponse {
-    let data: Data
-    let response: URLResponse
+    func fetchBooks() {
+        realmManager.fetchBooks()
+            .sink { completion in
+                print("Completion: \(completion)")
+            } receiveValue: { [weak self] books in
+                self?.books = books
+                self?.onReloadTableView.send(())
+            }.store(in: &subscriptions)
+    }
+    
+    func deleteBook(book: Book) {
+        realmManager.deleteBook(book: book)
+            .sink { completion in
+                print("Completion: \(completion)")
+            } receiveValue: { [weak self] _ in
+                self?.fetchBooks()
+            }.store(in: &subscriptions)
+    }
+    
+    func deleteAll() {
+        realmManager.deleteAll()
+            .sink { completion in
+                print("Completion: \(completion)")
+            } receiveValue: { [weak self] _ in
+                self?.fetchBooks()
+            }.store(in: &subscriptions)
+    }
+    
+    func setupRealmObserver() {
+        realmManager.setupRealmObserver()
+            .sink { completion in
+                print("setupRealmObserver Completion: \(completion)")
+            } receiveValue: { [weak self] value in
+                self?.trashButtonState.send(value)
+            }.store(in: &subscriptions)
+    }
+    
+    
+    
 }

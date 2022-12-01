@@ -7,101 +7,137 @@
 
 import RealmSwift
 import Foundation
+import Combine
 
-class BookRealmManager {
+protocol BookRealmService: AnyObject {
+    func fetchBooks() -> AnyPublisher<[Book], Error>
+    func deleteBook(book: Book) -> AnyPublisher<Void, Error>
+    func deleteAll() -> AnyPublisher<Void, Error>
+    func addBook(title: String?, subtitle: String?, price: String?) -> AnyPublisher<Void, Error>
+    func updateBook(subtitle: String?, price: String?, book: Book?) -> AnyPublisher<Void, Error>
+    func setupRealmObserver() -> AnyPublisher<Bool, Error>
+}
+
+class BookRealmManager: BookRealmService {
     
-    static let shared = BookRealmManager()
-    
+    private let config: Realm.Configuration
     private var notificationToken: NotificationToken?
     
-    private var realm: Realm? {
-        do {
-            let realm = try Realm()
-            return realm
-        } catch {
-            print("Realm error: \(error)")
-            return nil
-        }
+    init(config: Realm.Configuration) {
+        self.config = config
     }
     
-    private init() {}
-    
-    func fetchBooks(completion: ([Book]) -> ()) {
-        if let results = realm?.objects(Book.self) {
-            let books = Array(results)
-            completion(books)
-        } else {
-            completion([Book]())
-        }
-    }
-    
-    func deleteBook(book: Book, completion: () -> ()) {
-        do {
-            try realm?.write({
-                realm?.delete(book)
-            })
-            completion()
-        } catch {
-            print("Realm delete Error: \(error)")
-        }
-    }
-    
-    func deleteAll(completion: () -> ()) {
-        do {
-            try realm?.write{
-                realm?.deleteAll()
+    func fetchBooks() -> AnyPublisher<[Book], Error> {
+        Future<[Book], Error> { promise in
+            do {
+                let realm = try Realm(configuration: self.config)
+                let result = realm.objects(Book.self)
+                let books = Array(result)
+                promise(.success(books))
+            } catch {
+                promise(.failure(error))
             }
-            completion()
-        } catch {
-            print("Realm delete all Error: \(error)")
-        }
+        }.eraseToAnyPublisher()
     }
     
-    func addBook(title: String?, subtitle: String?, price: String?) {
-        guard let title = title,
-              let subtitle = subtitle,
-              let priceString = price, let price = Double(priceString) else { return }
-        
-        do {
-            let book = Book()
-            book.title = title
-            book.subTitle = subtitle
-            book.price = price
+    func deleteBook(book: Book) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { promise in
+            do {
+                let realm = try Realm(configuration: self.config)
+                try realm.write {
+                    realm.delete(book)
+                }
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func deleteAll() -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { promise in
+            do {
+                let realm = try Realm(configuration: self.config)
+                try realm.write {
+                    realm.deleteAll()
+                }
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func addBook(title: String?, subtitle: String?, price: String?) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { promise in
+            guard let title = title,
+                  let subtitle = subtitle,
+                  let priceString = price, let price = Double(priceString)
+            else {
+                promise(.success(()))
+                return
+            }
             
-            try realm?.write {
-                realm?.add(book)
-            }
-        } catch {
-            print("Realm add error: \(error)")
-        }
-    }
-    
-    func updateBook(subtitle: String?, price: String?, book: Book?) {
-        guard let book = book,
-              let subtitle = subtitle,
-              let priceString = price, let price = Double(priceString) else { return }
-        
-        do {
-            try realm?.write {
+            do {
+                let realm = try Realm(configuration: self.config)
+                let book = Book()
+                book.title = title
                 book.subTitle = subtitle
                 book.price = price
+                
+                try realm.write {
+                    realm.add(book)
+                }
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
             }
-        } catch {
-            print("Realm update error: \(error)")
-        }
+        }.eraseToAnyPublisher()
     }
     
-    func setupRealmObserver(deleteAllCompletion: @escaping (Bool) -> ()) {
-        notificationToken = realm?.objects(Book.self).observe { change in
-            switch change {
-            case .initial(let collectionType):
-                collectionType.count == 0 ? deleteAllCompletion(true) : deleteAllCompletion(false)
-            case .update(let collectionType, _, _, _):
-                collectionType.count == 0 ? deleteAllCompletion(true) : deleteAllCompletion(false)
-            case .error(let error):
-                print("Realm notification observer error: \(error)")
+    func updateBook(subtitle: String?, price: String?, book: Book?) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { promise in
+            guard let book = book,
+                  let subtitle = subtitle,
+                  let priceString = price, let price = Double(priceString)
+            else {
+                promise(.success(()))
+                return
             }
             
-        }
+            do {
+                let realm = try Realm(configuration: self.config)
+                try realm.write {
+                    book.subTitle = subtitle
+                    book.price = price
+                }
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }.eraseToAnyPublisher()
     }
+    
+    func setupRealmObserver() -> AnyPublisher<Bool, Error> {
+        let subject = PassthroughSubject<Bool, Error>()
+        
+        do {
+            let realm = try Realm(configuration: self.config)
+            self.notificationToken = realm.objects(Book.self).observe { change in
+                switch change {
+                case .initial(let collectionType):
+                    collectionType.count == 0 ? subject.send(false) : subject.send(true)
+                case .update(let collectionType, _, _, _):
+                    collectionType.count == 0 ? subject.send(false) : subject.send(true)
+                case .error(let error):
+                    print("Realm notification observer error: \(error)")
+                }
+            }
+        } catch {
+            subject.send(completion: .failure(error))
+        }
+        
+        return subject.eraseToAnyPublisher()
+    }
+    
 }

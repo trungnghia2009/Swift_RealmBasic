@@ -18,9 +18,8 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var trashButton: UIBarButtonItem!
     
-    private let realm = BookRealmManager.shared
     private let viewModel = HomeViewModel()
-    private var cancellables = Set<AnyCancellable>()
+    private var subscriptions = Set<AnyCancellable>()
     
     weak var delegate: HomeViewControllerDelegate? //For passing data from home to detail via delegate
     var callForward: ((String) -> ())? //For passing data from home to detail via closure
@@ -28,10 +27,8 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Home"
-        realm.setupRealmObserver { isDisable in
-            self.trashButton.isEnabled = !isDisable
-        }
         setupTableView()
+        setupObserver()
         
         // For simulate asyn event
         DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
@@ -43,16 +40,23 @@ class HomeViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        fetchData()
+        viewModel.fetchBooks()
     }
     
-    private func fetchData() {
-        realm.fetchBooks { [weak self] books in
-            viewModel.setBooks(books: books)
-            DispatchQueue.main.async {
+    private func setupObserver() {
+        viewModel.setupRealmObserver()
+        
+        viewModel.trashButtonState
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                self?.trashButton.isEnabled = value
+            }.store(in: &subscriptions)
+        
+        viewModel.onReloadTableView
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
                 self?.tableView.reloadData()
-            }
-        }
+            }.store(in: &subscriptions)
     }
     
     private func setupTableView() {
@@ -78,9 +82,7 @@ class HomeViewController: UIViewController {
         let alert = UIAlertController(title: "Delete All", message: "Do you wanna delete all books ?", preferredStyle: .alert)
         
         let okAction = UIAlertAction(title: "Ok", style: .destructive) { [weak self] _ in
-            self?.realm.deleteAll {
-                self?.fetchData()
-            }
+            self?.viewModel.deleteAll()
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in }
         
@@ -120,9 +122,7 @@ extension HomeViewController: UITableViewDelegate {
         if editingStyle == .delete {
             let selectedBook = viewModel.getBook(at: indexPath.row)
             print("Deleting: \(selectedBook)")
-            realm.deleteBook(book: selectedBook) { [weak self] in
-                self?.fetchData()
-            }
+            viewModel.deleteBook(book: selectedBook)
         }
     }
 }
@@ -130,7 +130,7 @@ extension HomeViewController: UITableViewDelegate {
 extension HomeViewController: AddViewControllerDelegate {
     func didTapAddButton() {
         print("Recieved value....")
-        fetchData()
+        viewModel.fetchBooks()
     }
     
 }

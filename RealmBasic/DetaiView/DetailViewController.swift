@@ -22,7 +22,6 @@ class DetailViewController: UIViewController {
     var book: Book?
     var controller: HomeViewController?
     private let viewModel = DetailViewModel()
-    private let realm = BookRealmManager.shared
     private var subscriptions = Set<AnyCancellable>()
     
     private var timer: Timer?
@@ -100,7 +99,7 @@ class DetailViewController: UIViewController {
             .publisher(for: .touchUpInside)
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                self.realm.updateBook(subtitle: self.subtitleTextField.text,
+                self.viewModel.updateBook(subtitle: self.subtitleTextField.text,
                                       price: self.priceTextField.text,
                                       book: self.book)
                 self.navigationController?.popViewController(animated: true)

@@ -13,6 +13,13 @@ class AddViewModel {
     let addButtonState = PassthroughSubject<Bool, Never>()
     let titleWarningState = PassthroughSubject<Bool, Never>()
     let subtitleWarningState = PassthroughSubject<Bool, Never>()
+    private var subscriptions = Set<AnyCancellable>()
+    
+    private let realmManager: BookRealmService
+    
+    init(realmManager: BookRealmService = BookRealmManager(config: RealmConfig.shared.config)) {
+        self.realmManager = realmManager
+    }
     
     func validateInput(title: String?, subtitle: String?, price: String?) {
         guard let titleCount = title?.count,
@@ -40,5 +47,12 @@ class AddViewModel {
             return
         }
         subtitleCount > 5 ? subtitleWarningState.send(false) : subtitleWarningState.send(true)
+    }
+    
+    func addBook(title: String?, subtitle: String?, price: String?) {
+        realmManager.addBook(title: title, subtitle: subtitle, price: price)
+            .sink { completion in
+                print("Completion: \(completion)")
+            } receiveValue: { _ in }.store(in: &subscriptions)
     }
 }
